@@ -1,0 +1,17 @@
+exceptiongroup
+iniconfig
+joblib
+numpy
+packaging
+pandas
+pluggy
+polars==1.9.0
+pytest
+python-dateutil
+pytz
+scikit-learn
+scipy
+six
+threadpoolctl
+tomli
+tzdata

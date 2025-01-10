@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Mneme"
+version = "0.1.0"
+authors = [
+    { name = "Hadjidoukas Panagiotis", email = "phadjido@gmail.com" },
+    { name = "Metaxakis Dimitris", email = "dimetaxakis@gmail.com" },
+    { name = "Sofotasios Argyris", email = "argsofos.1@gmail.com" }
+]
+maintainers = [
+    {name = "Sofotatios Argyris", email = "argsofos.1@gmail.com"},
+    {name = "Metaxakis Dimitris", email = "dimetaxakis@gmail.com"}
+]
+description = "A high-performance, parallel computing library designed to accelerate tasks in ML pipelines."
+readme = { file = "README.md", content-type = "text/markdown" }
+keywords = ["parallelism", "scikit-learn", "data preprocessing", "HPC", "big data", "machine learning"]
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "exceptiongroup",
+    "iniconfig",
+    "joblib",
+    "numpy",
+    "packaging",
+    "pandas",
+    "pluggy",
+    "polars == 1.9.0",
+    "pytest",
+    "python-dateutil",
+    "pytz",
+    "scikit-learn",
+    "scipy",
+    "six",
+    "threadpoolctl",
+    "tomli",
+    "tzdata"
+]
+
+[project.urls]
+Homepage = "https://github.com/CEID-HPCLAB/Mneme"
+
+[tool.setuptools]
+packages = { find = { where = ["src"] } }
