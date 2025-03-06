@@ -326,19 +326,20 @@ class ParPreprocessor():
         # Define a helper function to compute a mapping from column names to their numeric indices
         # This mapping is useful because we need to refer to columns by their index rather than 
         # their name (e.g. when we have a numpy array)
-        def _compute_mapping(columns: pd.Index) -> dict:
+        def _compute_mapping(columns: list) -> dict:
             '''
             Compute a mapping from column names to their numeric indices.
             
             Args:
-                columns (pd.Index): The column names.
+                columns (list): The column names.
 
             Returns:
                 dict: A dictionary mapping column names to their numeric indices.
             '''
             
-            # The keys of the dictionary are the column names and the values are the corresponding indices
-            col_indices = columns.to_series().reset_index(drop = True).to_dict()
+            # The keys of the dictionary are the column names and the values are the corresponding indices  
+            # print(columns)
+            col_indices = pd.Series(columns).reset_index(drop = True).to_dict()
             
             # Reverse the key-value pairs in the dictionary
             cols_mapping = {v: k for k, v in col_indices.items()}
@@ -360,7 +361,10 @@ class ParPreprocessor():
             # parameter. We only read the columns that will be used by the pipeline's preprocessors.
             dfX_train = pl.read_csv(dfile, has_header = False, n_rows = block_size, 
                                     n_threads = self.IO_workers, new_columns = list(feature_num_idx_dict.keys()),
-                                    columns = list(feature_num_idx_dict.values()))
+                                    columns = list(feature_num_idx_dict.values()), schema_overrides = {"column_10": pl.Float64})
+
+            # print("----------------")
+            # print(dfX_train.columns)
         
         
         # If an imputer is provided, apply it to the data

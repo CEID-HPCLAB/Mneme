@@ -219,8 +219,17 @@ class ParImputer():
             imputer = imputer_callable(**imputer_args["metadata"])
             
             # Fit the imputer to the corresponding features of the loaded chunk of data
-            imputer.fit(chunk[imputer_args["feature_names"]])
-            imputer.n_samples_seen_ = chunk.shape[0]
+
+            try:
+               
+                imputer.fit(chunk[imputer_args["feature_names"]])
+                imputer.n_samples_seen_ = chunk.shape[0]
+            
+            except Exception as e:
+                print(e)
+                print(chunk[imputer_args["feature_names"]].dtypes)
+                print(block_offset)
+
             
             # If the imputer strategy is mean, calculate and store the count of NaN values
             # Τhis is necessary for the incremental mean and variance algorithm (T. Chan, G. Golub, R. LeVeque. 
@@ -347,10 +356,17 @@ class ParImputer():
             contains = lambda idx: idx in chunk_features
             feature_num_idx_dict = dict(filter(lambda feature_pair: contains(feature_pair[0]), feature_idxs_map.items()))
            
+
+            try:
        
-            # Read the chunk of data from the file, selecting only the required columns
-            chunk = pl.read_csv(dfile, has_header = False, n_rows = block_size, new_columns = list(feature_num_idx_dict.keys()),
-                                n_threads = self.IO_workers, columns = list(feature_num_idx_dict.values()))
+                # Read the chunk of data from the file, selecting only the required columns
+                chunk = pl.read_csv(dfile, has_header = False, n_rows = block_size, new_columns = list(feature_num_idx_dict.keys()),
+                                    n_threads = self.IO_workers, columns = list(feature_num_idx_dict.values()), schema_overrides = {"column_10": pl.Float64})
+            
+
+            except Exception as e:
+                print(e)
+                print(block_offset)
         
         
         return chunk

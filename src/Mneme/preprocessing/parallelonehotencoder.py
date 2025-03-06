@@ -380,22 +380,22 @@ class ParOneHotEncoder(OneHotEncoder):
         '''
         
         # Nested function to provide a mapping of features with their corresponding numerical indices.
-        def  _compute_mapping(columns: pd.Index) -> Dict[str, int]:
+        def _compute_mapping(columns: list) -> dict:
             '''
-            Compute a mapping of features with their corresponding numerical indices.
-
-            This method takes a pandas Index object of column names, resets the index, converts it to a dictionary 
-            and then inverts the key-value pairs in the dictionary to create a mapping from column names to their 
-            corresponding numerical indices.
-
+            Compute a mapping from column names to their numeric indices.
+            
             Args:
-                columns (pd.Index): A pandas Index object containing the column names.
+                columns (list): The column names.
 
             Returns:
-                Dict[str, int]: A dictionary mapping column names to their corresponding numerical indices.
+                dict: A dictionary mapping column names to their numeric indices.
             '''
             
-            col_indices = columns.to_series().reset_index(drop = True).to_dict()
+            # The keys of the dictionary are the column names and the values are the corresponding indices  
+            # print(columns)
+            col_indices = pd.Series(columns).reset_index(drop = True).to_dict()
+            
+            # Reverse the key-value pairs in the dictionary
             cols_mapping = {v: k for k, v in col_indices.items()}
             
             return cols_mapping
