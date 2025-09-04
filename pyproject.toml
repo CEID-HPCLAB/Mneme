@@ -6,17 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "Mneme"
 version = "0.1.0"
 authors = [
-    { name = "Hadjidoukas Panagiotis", email = "phadjido@gmail.com" },
-    { name = "Metaxakis Dimitris", email = "dimetaxakis@gmail.com" },
-    { name = "Sofotasios Argyris", email = "argsofos.1@gmail.com" }
+    {name = "Sofotasios Argiris", email = "a.sofotasios@ceid.upatras.gr"},
+    {name = "Metaxakis Dimitris", email = "d.metaxakis@ceid.upatras.gr"},
+    {name = "Hadjidoukas Panagiotis", email = "phadjido@ceid.upatras.gr"}
 ]
 maintainers = [
-    {name = "Sofotatios Argyris", email = "argsofos.1@gmail.com"},
-    {name = "Metaxakis Dimitris", email = "dimetaxakis@gmail.com"}
+    {name = "Sofotasios Argiris", email = "a.sofotasios@ceid.upatras.gr"},
+    {name = "Metaxakis Dimitris", email = "d.metaxakis@ceid.upatras.gr"}
 ]
-description = "A high-performance, parallel computing library designed to accelerate tasks in ML pipelines."
+description = "A parallel framework for high-performance out-of-core preprocessing of large tabular datasets on single-node systems"
 readme = { file = "README.md", content-type = "text/markdown" }
-keywords = ["parallelism", "scikit-learn", "data preprocessing", "HPC", "big data", "machine learning"]
+keywords = ["parallel processing", "data preprocessing", "large tabular data", "machine learning", "HPC"]
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
