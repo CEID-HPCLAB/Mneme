@@ -1,1 +1,3 @@
-This repository contains the source code related to our paper submission ***"Mneme: A Parallel Preprocessing Framework for Large Tabular Datasets"*** for the 18th International Symposium on High-level Parallel Programming and Applications (**HLPP 2025**).
+This repository contains the source code related to our paper ***"Mneme: A Parallel Preprocessing Framework for Large Tabular Datasets"***, accepted for presentation at the 18th International Symposium on High-level Parallel Programming and Applications (**HLPP 2025**), Innsbruck, Austria, July 2025.
+
+**Update**: A revised version of the paper has been invited for submission to the *HLPP 2025 Special Issue* of the International Journal of Parallel Programming (**IJPP**).
