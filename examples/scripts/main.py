@@ -377,17 +377,17 @@ def main():
     encoders = [(LabelEncoder(), cat_idxs)]
     fit_preprocessors_large_ds(data = df, scalers = scalers, encoders = encoders, print_stats = False)
     
-    par_maxabs_scaler = ParMaxAbsScaler(data_file = training_file, num_idxs = num_idxs)
-    par_maxabs_scaler._fit(use_parallel = True, block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)  
+    par_maxabs_scaler = ParStandardScaler(data_file = training_file, num_idxs = num_idxs)
+    par_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)  
     
     seq_maxabs_scaler = ParMaxAbsScaler(data_file = training_file, num_idxs = num_idxs)
-    seq_maxabs_scaler._fit(use_parallel = True, block_reader = block_reader_loader, num_workers = 1, IO_workers = 1) 
+    seq_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers) 
     
     par_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    par_ord_enc._fit(use_parallel = True, block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
+    par_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
 
-    seq_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    seq_ord_enc._fit(use_parallel = True, block_reader = block_reader_loader, num_workers = 1, IO_workers = 1)
+    seq_ord_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs)
+    seq_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
     
 if __name__ == '__main__':
     main()

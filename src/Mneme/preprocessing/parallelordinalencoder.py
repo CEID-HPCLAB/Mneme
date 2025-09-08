@@ -163,7 +163,7 @@ class ParOrdinalEncoder(OrdinalEncoder):
             print(f"{kind_encoder}: Feature = {self.feature_names_in_[index]}, Categories = {self.categories_[index]}")
 
     
-    def _fit(self, use_parallel: Optional[bool] = False, block_reader: Union[Optional[BlockReader], None] = None, 
+    def fit(self, block_reader: Union[Optional[BlockReader], None] = None, 
              num_workers: Optional[int] = 2, IO_workers: Optional[int] = 1, num_blocks: Optional[int] = 100,
              chunk_size: Optional[int] = 5000, imputer: Union[Optional[ParImputer], None] = None) -> None: 
         '''
@@ -190,7 +190,7 @@ class ParOrdinalEncoder(OrdinalEncoder):
             None   
         '''
         
-        if not use_parallel:
+        if num_workers == 1 and IO_workers == 1:
             # Set chunk_size to the block_size of block_reader if it exists, otherwise keep the provided chunk_size
             chunk_size = block_reader.block_size if block_reader is not None else chunk_size
             
