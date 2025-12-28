@@ -136,7 +136,14 @@ def compute_drop_idxs(onehotencoder: OneHotEncoder) -> None:
     # If 'drop' is neither None, 'first' nor 'if_binary', it is assumed to be an array-like of shape (n_features,)
     # specifying the categories to be dropped for each feature
     else:
-        onehotencoder.drop_idx_ = np.array(onehotencoder.drop, dtype=object)
+        def get_cat_idx(val, cats):
+            try:
+                return np.where(cats == val)[0][0]
+            except IndexError:
+                raise ValueError(f"{val} not found in {cats}")
+
+        onehotencoder.drop_idx_ = np.array([None if d is None else get_cat_idx(d, cats)
+                                            for d, cats in zip(onehotencoder.drop, onehotencoder.categories_)], dtype = object)
         onehotencoder._drop_idx_after_grouping = onehotencoder.drop_idx_
         
         # Find the indices of the features where a category is to be dropped

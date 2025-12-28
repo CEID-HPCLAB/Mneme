@@ -15,7 +15,6 @@ from Mneme import LogLevel
 from Mneme import BlockReader
 from Mneme.preprocessing import (ParStandardScaler,
                                   ParMinMaxScaler,
-                                  ParRobustScaler,
                                   ParMaxAbsScaler,
                                   ParMinMaxScaler,
                                   ParPreprocessor,
@@ -381,13 +380,19 @@ def main():
     par_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)  
     
     seq_maxabs_scaler = ParMaxAbsScaler(data_file = training_file, num_idxs = num_idxs)
-    seq_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers) 
+    seq_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1) 
     
     par_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
     par_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
 
-    seq_ord_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    seq_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
+    seq_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
+    seq_ord_enc.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1)
+
+    par_ohe_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs, drop = ["Female"])
+    par_ohe_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
+
+    seq_ohe_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs)
+    seq_ohe_enc.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1)
     
 if __name__ == '__main__':
     main()
