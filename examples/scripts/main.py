@@ -17,7 +17,7 @@ from Mneme.preprocessing import (ParStandardScaler,
                                   ParMinMaxScaler,
                                   ParMaxAbsScaler,
                                   ParMinMaxScaler,
-                                  ParPreprocessor,
+                                  ParallelPipeline,
                                   ParLabelEncoder,
                                   ParOneHotEncoder,
                                   ParOrdinalEncoder,
@@ -342,15 +342,15 @@ def main():
     
     # Parallel Imputing Pipeline
     par_imputer = ParImputer(imputers_map, custom_block_reader = block_reader_loader, IO_workers = IO_workers, num_workers = num_workers)
-    par_imputer.parallel_fit()
-    # par_imputer.print()
+    par_imputer.fit()
+    par_imputer.print()
     
-    # Sequential Imputer Pipeline
-    df = pd.read_csv(training_file, chunksize = block_reader_loader.block_size)
-    fit_imputers_large_ds(df, imputers_map, print_stats = False)
+    # # Sequential Imputer Pipeline
+    # df = pd.read_csv(training_file, chunksize = block_reader_loader.block_size)
+    # fit_imputers_large_ds(df, imputers_map, print_stats = False)
     
     # Parallel Preprocessing Pipeline      
-    par_preprocessor = ParPreprocessor(preprocessors = {"InputVar": [ParStandardScaler(data_file = training_file, 
+    par_pipeline = ParallelPipeline({"InputFeatures": [ParStandardScaler(data_file = training_file, 
                                                                                        num_idxs = num_idxs[:300] ), 
                                                                      ParStandardScaler(data_file = training_file, 
                                                                                        num_idxs = num_idxs[300:450], with_mean = False) ,
@@ -362,37 +362,24 @@ def main():
                                                                      
                                                         "TargetVar": [ParLabelEncoder(data_file = training_file,
                                                                                     cat_idxs = cat_idxs),
-                                                        ]},
-                                       block_reader= block_reader_loader, num_workers = num_workers, 
-                                       imputer = par_imputer, IO_workers = IO_workers)
+                                                        ]}, training_file)
+                                      
     
-    par_preprocessor.parallel_fit()
-    # par_preprocessor.print()
+    par_pipeline.fit(block_reader= block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
+    par_pipeline.print()
     
-    # Sequential Preprocessing Pipeline with Scikit-Learn
-    df = pd.read_csv(training_file, chunksize = block_reader_loader.block_size)
-    scalers = [(StandardScaler(), num_idxs[:300]), (StandardScaler(with_mean = False), num_idxs[300:450]), 
-               (MinMaxScaler(), num_idxs[450:600]),(MaxAbsScaler(), num_idxs[600:])]
-    encoders = [(LabelEncoder(), cat_idxs)]
-    fit_preprocessors_large_ds(data = df, scalers = scalers, encoders = encoders, print_stats = False)
+    # # Sequential Preprocessing Pipeline with Scikit-Learn
+    # df = pd.read_csv(training_file, chunksize = block_reader_loader.block_size)
+    # scalers = [(StandardScaler(), num_idxs[:300]), (StandardScaler(with_mean = False), num_idxs[300:450]), 
+    #            (MinMaxScaler(), num_idxs[450:600]),(MaxAbsScaler(), num_idxs[600:])]
+    # encoders = [(LabelEncoder(), cat_idxs)]
+    # fit_preprocessors_large_ds(data = df, scalers = scalers, encoders = encoders, print_stats = False)
     
-    par_maxabs_scaler = ParStandardScaler(data_file = training_file, num_idxs = num_idxs)
+    par_maxabs_scaler = ParMaxAbsScaler(data_file = training_file, num_idxs = num_idxs)
     par_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)  
     
-    seq_maxabs_scaler = ParMaxAbsScaler(data_file = training_file, num_idxs = num_idxs)
-    seq_maxabs_scaler.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1) 
-    
     par_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    par_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
-
-    seq_ord_enc = ParOrdinalEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    seq_ord_enc.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1)
-
-    par_ohe_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs, drop = ["Female"])
-    par_ohe_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
-
-    seq_ohe_enc = ParOneHotEncoder(data_file = training_file, cat_idxs = cat_idxs)
-    seq_ohe_enc.fit(block_reader = block_reader_loader, num_workers = 1, IO_workers = 1)
+    par_ord_enc.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers) 
     
 if __name__ == '__main__':
     main()
