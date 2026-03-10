@@ -3,7 +3,7 @@ from Mneme.preprocessing import (ParStandardScaler,
                                   ParRobustScaler,
                                   ParMaxAbsScaler,
                                   ParMinMaxScaler,
-                                  ParPreprocessor,
+                                  ParallelPipeline,
                                   ParLabelEncoder,
                                   ParOneHotEncoder,
                                   ParOrdinalEncoder,
@@ -33,9 +33,6 @@ def datafile_path() -> str:
     This fixture constructs the path to a data file located in the "data" directory 
     relative to the directory of the current file. The fixture has module scope, so the path is constructed only once 
     per test module.
-
-    Returns:
-        str: The path to the data file.
     '''
     
     # Construct the path to the data file
@@ -54,12 +51,6 @@ def generate_BlockReader(datafile_path) -> BlockReader:
     
     This fixture creates a BlockReader instance with the provided data file path. 
     The fixture has module scope, so the BlockReader instance is created only once per test module.
-
-    Args:
-        datafile_path (str): The path to the data file.
-
-    Returns:
-        BlockReader: The created BlockReader instance.
     '''
     
     # Create a BlockReader instance with the provided data file path 
@@ -75,13 +66,6 @@ def generate_scalers_params(file_path: str) -> list:
     This function creates instances of four different types of scalers (ParStandardScaler, 
     ParMinMaxScaler, ParMaxAbsScaler, ParRobustScale), each with the provided data file 
     path and a list of numerical feature indices. The function returns a list of these scaler instances.
-
-    Args:
-        file_path (str): The path to the data file.
-
-    Returns:
-        List[ParStandardScaler, ParMinMaxScaler, ParMaxAbsScaler, ParRobustScaler]: 
-        The list of created scaler instances.
     '''
     
     scalers = []
@@ -103,13 +87,6 @@ def generate_encoders_params(file_path: str) -> list:
     This function creates instances of three different types of encoders (ParOneHotEncoder, 
     ParLabelEncoder, ParOrdinalEncoder), each with the provided data file 
     path and a list of categorical feature indices. The function returns a list of these encoder instances.
-
-    Args:
-        file_path (str): The path to the data file.
-
-    Returns:
-        List[ParOneHotEncoder, ParLabelEncoder, ParOrdinalEncoder]: 
-        The list of created encoder instances.
     '''
     
     encoders = []
@@ -128,12 +105,6 @@ def get_scalers_statistic_attributes(par_scaler) -> List[str]:
     Function to get the statistic attributes of a scaler instance.
     
     This function checks the type of the provided scaler instance and returns a list of its statistic attributes.
-
-    Args:
-        par_scaler (Scaler): The scaler instance.
-
-    Returns:
-        List[str]: The list of the scaler's statistic attributes.
     '''
     
     # Check the type of the scaler and return the corresponding statistic attributes
@@ -157,14 +128,7 @@ def check_label_encoder(par_encoders: ParLabelEncoder,
     
     This function iterates over the attributes of the provided encoders and checks if they are equal. 
     If the attribute is "classes_" or if both attribute values are numpy arrays, it checks if all elements are equal.
-
-    Args:
-        par_encoders (ParLabelEncoder): The first encoder to compare.
-        seq_encoders (ParLabelEncoder): The second encoder to compare.
-
-    Returns:
-        None
-    '''
+   '''
     
     # Iterate over the fitted label encoders
     for encoder in zip(par_encoders.label_encoders.values(), seq_encoders.label_encoders.values()): 
@@ -185,81 +149,46 @@ def check_label_encoder(par_encoders: ParLabelEncoder,
                 assert  par_attr_val == seq_attr_val
                 
                 
-@pytest.fixture(scope = "module", params = generate_scalers_params(f"./data/sample_data.csv"))
-def preprocessor_scalers(request: pytest.FixtureRequest, generate_BlockReader: BlockReader) -> Tuple[ParPreprocessor, Any]:
-    '''
-    Pytest fixture to create a pair of preprocessors.
-    
-    This fixture creates a ParPreprocessor Pipeline wtih one scaler and a copy of the provided scaler. 
-    The ParPreprocessor is initialized with a block reader and a dictionary of preprocessors. 
-    The fixture returns a tuple of the created preprocessors.
+@pytest.fixture(scope="module", params=[ParStandardScaler, ParMinMaxScaler, ParMaxAbsScaler, ParRobustScaler])
+def preprocessor_scalers(request, datafile_path) -> Tuple[ParallelPipeline, Any]:
 
-    Args:
-        request (pytest.FixtureRequest): An object that has a param attribute which is set to the value 
-                                         returned by the params option of the pytest.fixture decorator.
-        generate_BlockReader (BlockReader): A function to generate a BlockReader instance.
+    scaler = request.param(data_file=datafile_path, num_idxs=[f"x{i}" for i in range(3)])
 
-    Returns:
-        Tuple[ParPreprocessor, Any]: The created preprocessors.
-    '''
-    
-    par_preprocessor = ParPreprocessor(block_reader = generate_BlockReader, preprocessors = {"InputVar": [request.param]})
-    
-    # Create a copy of the provided scaler
-    seq_preprocessor = deepcopy(request.param)
-    
+    par_preprocessor = ParallelPipeline({"InputFeatures": [scaler]}, datafile_path)
+
+    seq_preprocessor = deepcopy(scaler)
+
     return par_preprocessor, seq_preprocessor
 
 
-@pytest.fixture(scope = "module", params = generate_encoders_params(f"./data/sample_data.csv"))
-def preprocessor_encoders(request: pytest.FixtureRequest, generate_BlockReader: BlockReader) -> Tuple[ParPreprocessor, Any]:
-    '''
-    Pytest fixture to create a pair of preprocessors for encoding.
+@pytest.fixture(scope="module", params=[ParOneHotEncoder, ParLabelEncoder, ParOrdinalEncoder])
+def preprocessor_encoders(request: pytest.FixtureRequest, datafile_path) -> Tuple[ParallelPipeline, Any]:
     
-    This fixture creates a ParPreprocessor Pipeline wtih one encoder and a copy of the provided encoder. 
-    The ParPreprocessor is initialized with a block reader and a dictionary of preprocessors. 
-    The fixture returns a tuple of the created preprocessors.
+    encoder = request.param(data_file=datafile_path, cat_idxs=[f"y{i}" for i in range(1,2)])
 
-    Args:
-        request (pytest.FixtureRequest): An object that has a param attribute which is set to the value 
-                                         returned by the params option of the pytest.fixture decorator.
-        generate_BlockReader (BlockReader): A function to generate a BlockReader instance.
+    par_preprocessor = ParallelPipeline({"TargetVar": [encoder]}, datafile_path)
 
-    Returns:
-        Tuple[ParPreprocessor, Any]: The created preprocessors.
-    '''
-    
-    par_preprocessor = ParPreprocessor(block_reader = generate_BlockReader, preprocessors = {"TargetVar": [request.param]})
-    
-    # Create a copy of the provided encoder
-    preprocessor = deepcopy(request.param)
-    
-    return par_preprocessor, preprocessor
+    seq_encoder = deepcopy(encoder)
+
+    return par_preprocessor, seq_encoder
 
 
-def test_scalers_results(preprocessor_scalers: Tuple[ParPreprocessor, Any], generate_BlockReader: BlockReader) -> None:
+def test_scalers_results(preprocessor_scalers: Tuple[ParallelPipeline, Any], generate_BlockReader: BlockReader) -> None:
     '''
     Test function to compare the results of two scalers.
     
     This function fits the preprocessors, retrieves the scalers and compares their attributes. 
-    
-    Args:
-        preprocessor_scalers (Tuple[ParPreprocessor, Any]): A tuple of preprocessors to compare.
-        generate_BlockReader (BlockReader): The block reader to use.
-
-    Returns:
-        None
     '''
     
     # Unpack the preprocessors
     par_preprocessor, seq_scaler = preprocessor_scalers
     
     # Fit the preprocessors
-    par_preprocessor.parallel_fit()
-    seq_scaler._fit(use_parallel = False, block_reader = generate_BlockReader)
+    par_preprocessor.fit(block_reader = generate_BlockReader, num_workers = 4, IO_workers = 2)
+    seq_scaler.fit(block_reader = generate_BlockReader, num_workers = 1, IO_workers = 1)
     
-    # Retrieve the fitted scaler from the ParPreprocessor pipeline
-    par_scaler = par_preprocessor.preprocessors["InputVar"].pop(0)
+    # Retrieve the fitted scaler from the ParallelPipeline 
+    par_scaler = par_preprocessor.operators["InputFeatures"].pop(0)
     
     # Get the statistical attributes of the scaler
     stats_attributes = get_scalers_statistic_attributes(par_scaler)
@@ -284,29 +213,22 @@ def test_scalers_results(preprocessor_scalers: Tuple[ParPreprocessor, Any], gene
             assert  par_attr_val == seq_attr_val
     
     
-def test_encoder_results(preprocessor_encoders: Tuple[ParPreprocessor, Any], generate_BlockReader: BlockReader) -> None:
+def test_encoder_results(preprocessor_encoders: Tuple[ParallelPipeline, Any], generate_BlockReader: BlockReader) -> None:
     '''
     Test function to compare the results of two encoders.
     
     This function fits the preprocessors, retrieves the encoders and compares their attributes. 
-
-    Args:
-        preprocessor_encoders (Tuple[ParPreprocessor, Any]): A tuple of preprocessors to compare.
-        generate_BlockReader (BlockReader): The block reader to use.
-
-    Returns:
-        None
     '''
     
     # Unpack the preprocessors
     par_preprocessor, seq_encoder = preprocessor_encoders
     
     # Fit the preprocessors
-    par_preprocessor.parallel_fit()
-    seq_encoder._fit(use_parallel = False, block_reader = generate_BlockReader)
+    par_preprocessor.fit(block_reader = generate_BlockReader, num_workers = 4, IO_workers = 2)
+    seq_encoder.fit(block_reader = generate_BlockReader, num_workers = 1, IO_workers = 1)
     
-    # Retrieve the fitted encoder from the ParPreprocessor pipeline
-    par_encoder = par_preprocessor.preprocessors["TargetVar"].pop(0)
+    # Retrieve the fitted encoder from the ParallelPipeline
+    par_encoder = par_preprocessor.operators["TargetVar"].pop(0)
     
     if isinstance(par_encoder, ParLabelEncoder):
         check_label_encoder(par_encoder, seq_encoder)

@@ -167,7 +167,7 @@ def test_imputers_results(pipeline_imputers: Tuple[ParImputer, SimpleImputer],
     par_imputers, seq_imputer = pipeline_imputers
     
     # Fit the parallel imputer
-    par_imputers.parallel_fit()
+    par_imputers.fit()
     
     # Get the fitted imputer from the parallel imputer
     par_imputer = par_imputers.reduced_imputers.pop(0)
@@ -177,30 +177,27 @@ def test_imputers_results(pipeline_imputers: Tuple[ParImputer, SimpleImputer],
     
     # Fit the sequential imputer
     seq_imputer = fit_seq_imputer(seq_imputer, imputer_features, datafile_path, generate_BlockReader)
-    
+
     eps = 1e-10
     
-    # Compare the attributes of the two imputers
-    for par_attr, seq_attr in zip(vars(par_imputer), vars(seq_imputer)):
-        
-        par_attr_val = getattr(par_imputer, par_attr)
-        seq_attr_val = getattr(seq_imputer, seq_attr)
-        
-        if par_attr == 'statistics_':
-            # Remove NaN values from the attribute values
+    common_attrs = set(vars(par_imputer)).intersection(vars(seq_imputer))
+
+    for attr in sorted(common_attrs): 
+        par_attr_val = getattr(par_imputer, attr)
+        seq_attr_val = getattr(seq_imputer, attr)
+
+        if attr == 'statistics_':
             par_attr_val = par_attr_val[~np.isnan(par_attr_val)]
             seq_attr_val = seq_attr_val[~np.isnan(seq_attr_val)]
             assert (np.abs(par_attr_val - seq_attr_val) <= eps).all()
         
-        # If the attribute values are numpy arrays, check if all elements are equal
         elif isinstance(par_attr_val, np.ndarray) and isinstance(seq_attr_val, np.ndarray):        
             assert (par_attr_val == seq_attr_val).all()
         
         else:
-            # If the attribute values are floats and the par_attr_val is NaN, check if seq_attr_val is also NaN
             if isinstance(par_attr_val, float) and isinstance(seq_attr_val, float): 
-                    if np.isnan(par_attr_val):
-                        assert np.isnan(seq_attr_val)
-                    continue 
-                
-            assert  par_attr_val == seq_attr_val
+                if np.isnan(par_attr_val):
+                    assert np.isnan(seq_attr_val)
+                continue 
+
+            assert par_attr_val == seq_attr_val

@@ -28,44 +28,15 @@ class ParOrdinalEncoder(OrdinalEncoder):
     final encoder and transforming data.
     '''
     
-    def __init__(self, data_file: str, cat_idxs: List[str], categories: Union[str, List[str]] = 'auto',
+    def __init__(self, cat_idxs: List[str], data_file: str = None, categories: Union[str, List[str]] = 'auto',
                  dtype: Optional[np.dtype] = np.float64, handle_unknown: Optional[str] = 'error', 
                  unknown_value: Optional[Union[np.float64, int]] = None, 
                  encoded_missing_value: Optional[Union[np.float64, int]] = np.nan) -> None:
-        '''
-        Initialize the ParOrdinalEncoder object.
-
-        This constructor method initializes the ParOrdinalEncoder object by calling the constructor of the superclass 
-        (OrdinalEncoder) with the provided parameters and initializing additional attributes specific to the 
-        ParOrdinalEncoder class.
-
-        Args:
-            data_file (str): The path to the training file containing the dataset.
-            cat_idxs (List[str]): A list of strings representing the names of the features to be encoded.
-            
-            categories (Union[str, List[str]], optional): The categories to be used for encoding. 
-            If 'auto', the categories are determined from the data. Defaults to 'auto'.
-            
-            dtype (Optional[np.dtype], optional): The desired data type of the output. Defaults to np.float64.
-            handle_unknown (Optional[str], optional): The method to handle unknown categories. 
-            If 'error', an error is raised. Defaults to 'error'.
-            
-            unknown_value (Union[np.float64, int], optional): The value to use to represent unknown categories. 
-            Defaults to None.
-            
-            encoded_missing_value (Union[np.float64, int], optional): The value to use to represent missing values 
-            after encoding. Defaults to np.nan.
-        
-        Returns:
-            None
-        '''
-
-        # Call the constructor of the superclass (OrdinalEncoder)
+      
         super(ParOrdinalEncoder, self).__init__(categories = categories, dtype = dtype, handle_unknown = handle_unknown,
                                                 unknown_value = unknown_value, encoded_missing_value = encoded_missing_value)
-        self.data_file = data_file
-        self.cat_idxs = cat_idxs
-        self.ordinal_encoders_ = []
+        
+        self.data_file = data_file; self.cat_idxs = cat_idxs; self.ordinal_encoders_ = []
 
 
     def process_chunk(self, chunk_data: pl.DataFrame) -> None:
@@ -83,9 +54,8 @@ class ParOrdinalEncoder(OrdinalEncoder):
         '''
         
         encoder = OrdinalEncoder(categories = self.categories, dtype = self.dtype, handle_unknown = self.handle_unknown,
-                            unknown_value = self.unknown_value, encoded_missing_value = self.encoded_missing_value)
+                                 unknown_value = self.unknown_value, encoded_missing_value = self.encoded_missing_value)
         
-        # Fit the encoder to the corresponding features in the chunk of data
         encoder.fit(chunk_data[self.cat_idxs])
         
         self.ordinal_encoders_.append(encoder)
@@ -102,26 +72,15 @@ class ParOrdinalEncoder(OrdinalEncoder):
             None
         '''
         
-        # Combine the encoders fitted to each chunk of data into a final encoder
         final_encoder = reduce_ordinal_encoders(self.ordinal_encoders_)
-        
-        # Copy the attributes of the final encoder to the ParOrdinalencoder object
         _copy_attr(self, final_encoder)
         
-        # Delete the list of the partial fitted encoders and the (combined) final encoder
-        del(self.ordinal_encoders_)
-        del(final_encoder)
+        del(self.ordinal_encoders_); del(final_encoder)
     
     
     def get_partial_fit(self) -> OrdinalEncoder:
         '''
         Returns the partial fitted encoder.
-        
-        It's important to note that this method also removes the returned encoder from the list. This is necessary 
-        to ensure that if the same process takes on another task, the `ordinal_encoders_` list does not still contain the 
-        partially fitted encoders from the previous tasks. If they weren't removed, the list would contain all 
-        the partial fitted encoders from tasks that the specific process has completed, resulting in us not knowing 
-        which is the partial fitted encoder of the specific task and therefore not returning the correct encoder.
 
         Returns:
             tmp_ordinal_encoders (OrdinalEncoder): The partial fitted encoder.
@@ -158,20 +117,15 @@ class ParOrdinalEncoder(OrdinalEncoder):
         
         kind_encoder = "poe" if use_parallel else "oe"
         
-        # Print categories_ attribute of the encoder
         for index in range(len(self.categories_)):
             print(f"{kind_encoder}: Feature = {self.feature_names_in_[index]}, Categories = {self.categories_[index]}")
 
     
     def fit(self, block_reader: Union[Optional[BlockReader], None] = None, 
-             num_workers: Optional[int] = 2, IO_workers: Optional[int] = 1, num_blocks: Optional[int] = 100,
-             chunk_size: Optional[int] = 5000, imputer: Union[Optional[ParImputer], None] = None) -> None: 
+            num_workers: Optional[int] = 2, IO_workers: Optional[int] = 1, num_blocks: Optional[int] = 100,
+            chunk_size: Optional[int] = 5000, imputer: Union[Optional[ParImputer], None] = None) -> None: 
         '''
         Read and fit blocks of data incrementally.
-        
-        This method reads the data file in chunks and fits the encoder to each chunk. If an imputer is provided, 
-        it also applies the imputation to each chunk before fitting the encoder. The method can operate in either 
-        sequential or parallel mode, depending on the value of the use_parallel parameter.
         
         Args:
             use_parallel (bool, optional): Whether to use parallel processing. Defaults to False.
@@ -191,85 +145,64 @@ class ParOrdinalEncoder(OrdinalEncoder):
         '''
         
         if num_workers == 1 and IO_workers == 1:
-            # Set chunk_size to the block_size of block_reader if it exists, otherwise keep the provided chunk_size
             chunk_size = block_reader.block_size if block_reader is not None else chunk_size
-            
-            # Read data from the provided CSV file in chunks
+
             data = pd.read_csv(self.data_file, chunksize = chunk_size)
-            
-            # If a block reader is not provided, create a new one
+
             block_reader = block_reader if block_reader is not None else BlockReader(self.data_file, method = 5, num_blocks = num_blocks)
-            
-            # Set the feature mapping by identifying the numerical indexes for the given column names (num_idxs)
+
             self._set_feature_mapping(block_reader.feature_idxs_map)
             
             t0 = time()
             
             if imputer is not None:
-                
-                # If imputer is provided, transform each chunk before fitting
                 for chunk_data in data:
                     chunk_data_np = chunk_data.to_numpy()
-                    # Apply the provided fitted imputer to the chunk
                     imputer.transform(chunk_data_np)
                     chunk_data = pd.DataFrame(chunk_data_np, columns = chunk_data.columns, copy = False)
-                    # Fit the encoder to the chunk
                     self.process_chunk(chunk_data)
                     
             else:
-                # Otherwise, directly process each chunk
                 for chunk_data in data:
                     self.process_chunk(chunk_data)
             
             t1 = time()
             
-            # Combine the fitted encoders into a final encoder
             self.reduce()
             
             t2 = time()
-            _Mneme_logger.benchmark(f"Sequential Times of Standalone OrdinalEncoder -> Fit: {t1-t0:.6f} | Reduce: {t2-t1:.6f}")
+            _Mneme_logger.benchmark(f"Sequential Standalone OrdinalEncoder Time -> Fit: {t1-t0:.6f} | Reduce: {t2-t1:.6f}")
             
         else:
-            # Parallel fitting 
             
             t0 = time()
-            # If a block reader is not provided, create a new one
+
             block_reader = block_reader if block_reader is not None else BlockReader(self.data_file, method = 5, num_blocks = num_blocks)
             
             block_size, columns, block_offsets, num_blocks, feature_idxs_map = \
             block_reader.block_size, block_reader.columns, block_reader.block_offsets,\
             block_reader.num_blocks, block_reader.feature_idxs_map
     
-            # Set the feature mapping by identifying the numerical indexes for the given column names (num_idxs)
             self._set_feature_mapping(block_reader.feature_idxs_map)
             
-            
             pool = mp.Pool(processes = num_workers)
-            # Create a partial function for fitting the encoders to the corresponding block of data
-            partial_func = partial(self._partial_fit, 
-                                   args = (block_size, columns, block_offsets, feature_idxs_map, imputer, IO_workers))
+            partial_func = partial(self._partial_fit, args = (block_size, columns, block_offsets, feature_idxs_map, imputer, IO_workers))
+            
             self.ordinal_encoders_ = pool.map(partial_func, range(num_blocks))
             
-            # Close the multiprocessing pool and wait for all processes to finish
-            pool.close()
-            pool.join()
+            pool.close(); pool.join()
             
             t1 = time()
             
-            # Combine the partial fitted encoders into a final encoder
             self.reduce()
             
             t2 = time()
-            _Mneme_logger.benchmark(f"Parallel Times of Standalone OrdinalEncoder -> Fit: {t1-t0:.6f} | Reduce: {t2-t1:.6f}")
+            _Mneme_logger.benchmark(f"Parallel Standalone OrdinalEncoder Time -> Fit: {t1-t0:.6f} | Reduce: {t2-t1:.6f}")
 
     
     def _partial_fit(self, index: int, args: tuple) -> OrdinalEncoder:
         '''
         Perform fitting on a specific block of data.
-
-        This method loads a block of data, fits a OrdinalEncoder on it and returns the fitted encoder. The block of data 
-        is determined by the value of the index, which specifies the block offset. The fitting is performed only on the 
-        columns that correspond to this specific encoder (cat_idxs), not all columns.
 
         Args:
             index (int): The index of the block of data to fit the encoder to.
@@ -284,16 +217,14 @@ class ParOrdinalEncoder(OrdinalEncoder):
         
         t0 = time()
         
-        # Load the block of data
         chunk = self._load_chunk(self.data_file, block_size, columns, self.cat_idxs, block_offsets[index], 
                                  feature_idxs_map, imputer, IO_workers)
         t1 = time()
         if block_offsets[index] == block_offsets[0]:
             print(f"[INFO] Indicative time for loading the data of a block [Standalone ParOrdinalEncoder]: {t1-t0:.6f}")
         
-        # Fit an OrdinalEncoder on the loaded chunk and return the encoder
         encoder = OrdinalEncoder(categories = self.categories, dtype = self.dtype, handle_unknown = self.handle_unknown,
-                            unknown_value = self.unknown_value, encoded_missing_value = self.encoded_missing_value)
+                                 unknown_value = self.unknown_value, encoded_missing_value = self.encoded_missing_value)
         encoder.fit(chunk[self.cat_idxs])
         
         return encoder
@@ -315,12 +246,9 @@ class ParOrdinalEncoder(OrdinalEncoder):
             None.
         '''
         
-        # Ignore warnings about feature_names_in when fitted with Pandas Dataframe containing named columns
         warnings.filterwarnings("ignore", category = UserWarning)
         
-        # Extract the specified columns for transformation and apply the transformation 
         transformed_data = super().transform(data[:, self.feature_idxs_])
-        # Assign the transformed values back to the original data array at the same column indices
         data[:, self.feature_idxs_] = transformed_data     
         
         warnings.resetwarnings()
@@ -341,13 +269,9 @@ class ParOrdinalEncoder(OrdinalEncoder):
             None
         '''
         
-        # Define a lambda (helper) function to check if an index is present in self.cat_idxs
         contains = lambda idx: idx in self.cat_idxs
-        
-        # Filter the feature indices map based on the indices stored in self.cat_idxs
         feature_cat_idx_dict = filter(lambda feature_pair: contains(feature_pair[0]), feature_idxs_map.items())
-        
-        # Store the numerical indices corresponding to the feature indices stored in self.cat_idxs
+
         self.feature_idxs_ = [feature_pair[1] for feature_pair in feature_cat_idx_dict]
     
     
@@ -355,10 +279,6 @@ class ParOrdinalEncoder(OrdinalEncoder):
                     block_offset: int, feature_idxs_map: Dict[str, int], imputer: Union[ParImputer, None], IO_workers: int) -> pl.DataFrame:
         '''
         Load a block of data from the training file.
-
-        This method reads a block of data from the training file, applies any necessary transformations (imputer) and returns 
-        the processed data. The block of data is determined by the block offset and block size. If an imputer is provided, 
-        it is used to fill in missing values in the data.
 
         Args:
             training_file (str): The path to the training file.
@@ -375,7 +295,6 @@ class ParOrdinalEncoder(OrdinalEncoder):
             pl.DataFrame: The processed block of data.
         '''
         
-        # Nested function to provide a mapping of features with their corresponding numerical indices.
         def _compute_mapping(columns: list) -> dict:
             '''
             Compute a mapping from column names to their numeric indices.
@@ -386,12 +305,8 @@ class ParOrdinalEncoder(OrdinalEncoder):
             Returns:
                 dict: A dictionary mapping column names to their numeric indices.
             '''
-            
-            # The keys of the dictionary are the column names and the values are the corresponding indices  
-            # print(columns)
+
             col_indices = pd.Series(columns).reset_index(drop = True).to_dict()
-            
-            # Reverse the key-value pairs in the dictionary
             cols_mapping = {v: k for k, v in col_indices.items()}
             
             return cols_mapping
@@ -413,11 +328,9 @@ class ParOrdinalEncoder(OrdinalEncoder):
             
             features = []
             
-            # Iterate over the imputers and extract their columns
             for imputer_idx in imputer.imputers_.keys():
                 cols = imputer.imputers_[imputer_idx]["cols"]
                 
-                # If columns are represented by numerical indices, convert them to column names
                 if isinstance(cols[0], int):
                     cols = [key for key, value in feature_idxs_map.items() if value in cols] 
                 
@@ -426,8 +339,6 @@ class ParOrdinalEncoder(OrdinalEncoder):
             features.extend(cat_idxs)
                 
             ordered_list = []
-            # Create a list containing the union of features from the ParImputer and ParOrdinalEncoder  
-            # in the order they appear.
             for el in columns:
                 if el in features and el not in ordered_list:
                     ordered_list.append(el)
@@ -438,32 +349,21 @@ class ParOrdinalEncoder(OrdinalEncoder):
         cols = cat_idxs if imputer is None else _compute_features(imputer, cat_idxs, columns)
         
         with open(training_file, 'r') as dfile:
-            # Move the file pointer to the specified block offset
             dfile.seek(block_offset)
             contains = lambda idx: idx in cols
             feature_num_idx_dict = dict(filter(lambda feature_pair: contains(feature_pair[0]), feature_idxs_map.items()))
-           
-            # Read the corresponding block of data from the file. The size of the block is determined by the 'block_size' 
-            # parameter. We only read the columns that will be used by the pipeline's preprocessors.
-            dfy_train = pl.read_csv(dfile, has_header = False, n_rows = block_size, 
-                                    n_threads = IO_workers, new_columns = list(feature_num_idx_dict.keys()),
-                                    columns = list(feature_num_idx_dict.values()))
+ 
+            dfy_train = pl.read_csv(dfile, has_header = False, n_rows = block_size,  n_threads = IO_workers, 
+                                    new_columns = list(feature_num_idx_dict.keys()), columns = list(feature_num_idx_dict.values()))
 
             
-        # Impute potentially missing values in the block of data if an imputer is provided
         if imputer is not None:
-            # Compute custom column mapping if the number of columns in dfy_train differs from the columns of the 
-            # total training dataset. This is done when the columns intended for fitting the encoder are fewer 
-            # than the columns in the entire dataset
-
             custom_cols_mapping = _compute_mapping(columns = dfy_train.columns)\
                                   if len(columns) != len(dfy_train.columns)\
                                   else None
             data_np = dfy_train.to_numpy()
             
-            # Apply the transformation using the imputer and the updated columns mapping
             imputer.transform(data_np, custom_cols_mapping)
-            # Convert the transformed numpy array back to a dataframe with the same columns
             dfy_train = pl.DataFrame(data_np, schema = dfy_train.columns)
         
         return dfy_train

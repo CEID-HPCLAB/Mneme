@@ -8,9 +8,9 @@ from .parallelmaxabsscaler import ParMaxAbsScaler
 from .parallelonehotencoder import ParOneHotEncoder
 from .parallelordinalencoder import ParOrdinalEncoder
 from .parallellabelencoder import ParLabelEncoder
-from .parallelpreprocessor import ParPreprocessor
+from .parallelpreprocessor import ParallelPipeline
 
-__all__ = ['ParPreprocessor',
+__all__ = ['ParallelPipeline',
            'ParImputer',
            'ParStandardScaler',
            'ParRobustScaler',

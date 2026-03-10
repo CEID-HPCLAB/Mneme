@@ -365,7 +365,7 @@ def main():
                                                         ]}, training_file)
                                       
     
-    par_pipeline.fit(block_reader= block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
+    par_pipeline.fit(block_reader = block_reader_loader, num_workers = num_workers, IO_workers = IO_workers)
     par_pipeline.print()
     
     # # Sequential Preprocessing Pipeline with Scikit-Learn

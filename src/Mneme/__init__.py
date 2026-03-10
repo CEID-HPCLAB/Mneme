@@ -1,4 +1,4 @@
-# init file for package ParPreprocessor
+# init file for package Mneme
 
 
 from .blockreader import BlockReader
