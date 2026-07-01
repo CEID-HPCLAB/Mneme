@@ -226,7 +226,7 @@ If you find Mneme useful for your research, please cite:
 
 
 ## Acknowledgments
-This research was carried out as part of easyhpc@eco.plastics.industry (MIS: 6001593), which is co-funded by the European Union under the Competitiveness Program (ESPA 2021–2027).    
+This research was carried out as part of [easyhpc@eco.plastics.industry](https://european-digital-innovation-hubs.ec.europa.eu/edih-catalogue/easyhpc) (MIS: 6001593), which is co-funded by the European Union under the Competitiveness Program (ESPA 2021–2027).    
 
 
 ## Contact
