@@ -45,7 +45,7 @@ pip install .
 ## Mneme
 
 ### Parallelism Scheme
-Mneme relies on a hybrid task-based parallelism scheme, inspired by the **MapReduce** paradigm, which combines **multiprocessing** and **multithreading**. The coordination and management of processes are accomplished using Python’s `multiprocessing` package, via a **process pool programming pattern** that incorporates adaptive task scheduling, akin to the dynamic scheduling policy of *OpenMP*. To circumvent the limitations imposed by the *Global Interpreter Lock (GIL)*, **Rust threads** are integrated via the CSV reading capabilities of the [Polars](https://pola.rs/) library.
+Mneme relies on a hybrid task-based parallelism scheme, inspired by the **MapReduce** paradigm, which combines **multiprocessing** and **multithreading**. The coordination and management of processes are accomplished using Python’s [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) package, via a **process pool programming pattern** that incorporates adaptive task scheduling, akin to the dynamic scheduling policy of *OpenMP*. To circumvent the limitations imposed by the *Global Interpreter Lock (GIL)*, **Rust threads** are integrated via the CSV reading capabilities of the [Polars](https://pola.rs/) library.
 
 ### API
 Built on top of the [scikit-learn](https://scikit-learn.org/stable/) ecosystem, Mneme adopts the widely used `fit()-transform()` API model, offering a simple, high-level, and intuitive interface. It provides a wide range of data preprocessing techniques within its `preprocessing` package, following a structure [similar to that of scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html). Specifically, the operators provided by Mneme are summarized in the following table.
