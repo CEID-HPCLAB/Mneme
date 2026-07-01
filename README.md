@@ -169,7 +169,7 @@ Furthermore, Mneme demonstrates *better scalability* compared to Polars. Across 
   <picture>
     <source srcset = "figs/fig_dark.png" media = "(prefers-color-scheme: dark)">
     <source srcset = "figs/fig_light.png" media = "(prefers-color-scheme: light)">
-    <img src = "figs/fig_light.png" width = "88%" alt = "Runtime performance (left: 126 GB, right: 101 GB)">
+    <img src = "figs/fig_light.png" width = "95%" alt = "Runtime performance (left: 126 GB, right: 101 GB)">
   </picture>
   <br>
   <em>Figure 1: Runtime performance on two datasets (left: 126 GB, right: 101 GB)</em>
