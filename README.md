@@ -1,4 +1,7 @@
 # 🚀 Mneme: A Parallel Preprocessing Framework for Large Tabular Datasets
+[![DOI](https://img.shields.io/badge/DOI-10.1007%2Fs10766--026--00817--7-FF7518)](https://doi.org/10.1007/s10766-026-00817-7)
+[![GitHub release](https://img.shields.io/github/v/release/CEID-HPCLAB/Mneme?include_prereleases&color=%238FD9FB)](https://github.com/CEID-HPCLAB/Mneme/releases)
+[![License](https://img.shields.io/badge/License-Apache--2.0-FFDEAD)](https://www.apache.org/licenses/LICENSE-2.0)  <br>
 
 [![Python 3.10](https://img.shields.io/badge/Python-3.10-purple?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3100/) 
 ![HPC](https://img.shields.io/badge/HPC-228B22?style=flat&logo=dna&logoColor=white)
