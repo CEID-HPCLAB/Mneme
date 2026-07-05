@@ -233,7 +233,8 @@ This research was carried out as part of [easyhpc@eco.plastics.industry](https:/
 
 
 ## Contact
+
 For questions, bug reports, or contributions, please open an issue or contact:
 
-Argiris Sofotasios  
-a.sofotasios@ac.upatras.com
+- Argiris Sofotasios — a.sofotasios@ac.upatras.gr 
+- Dimitris Metaxakis — d.metaxakis@ac.upatras.gr
