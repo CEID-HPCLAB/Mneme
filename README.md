@@ -71,7 +71,7 @@ The code listing below shows a representative example of applying Z-Score Normal
 
 Initially, a `BlockReader` component is employed to partition the dataset into blocks (**virtual files**). The path to a binary block offset file is provided, specifying where the computed offsets will be stored (`block_offset_save`). This file can be reused in subsequent runs, enabling faster preprocessing pipeline execution without recomputing the block offsets. 
 
-Next, a StandardScaler (`ParStandardScaler`) is instantiated and fitted to the specified 700 input features (`num_idxs`). The fitting process is performed using four processes (`workers`), each employing two threads (IO_threads) for block fetching. The result is a fitted StandardScaler, ready to be used in subsequent pipeline stages for *on the fly* data transformation during batch-level fetching. 
+Next, a StandardScaler (`ParStandardScaler`) is instantiated and fitted to the specified 700 input features (`num_idxs`). The fitting process is performed using four processes (`workers`), each employing two threads (`IO_threads`) for block fetching. The result is a fitted StandardScaler, ready to be used in subsequent pipeline stages for *on the fly* data transformation during batch-level fetching. 
 
 By instantiating the corresponding operator object, the same procedure can be used to fit any standalone operator listed in the table above.
 
