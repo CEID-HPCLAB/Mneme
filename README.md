@@ -53,6 +53,8 @@ Mneme relies on a hybrid task-based parallelism scheme, inspired by the **MapRed
 ### API
 Built on top of the [scikit-learn](https://scikit-learn.org/stable/) ecosystem, Mneme adopts the widely used `fit()-transform()` API model, offering a simple, high-level, and intuitive interface. It provides a wide range of data preprocessing techniques within its `preprocessing` package, following a structure [similar to that of scikit-learn](https://scikit-learn.org/stable/modules/preprocessing.html). Specifically, the operators provided by Mneme are summarized in the following table.
 
+<br>
+
 | Operator         | Description |
 |-----------------|-------------|
 | [StandardScaler](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelstandardscaler.py)   | Z-score normalization |
@@ -62,6 +64,8 @@ Built on top of the [scikit-learn](https://scikit-learn.org/stable/) ecosystem, 
 | [OneHotEncoder](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelonehotencoder.py)    | Binary transformation for nominal categorical features |
 | [OrdinalEncoder](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelordinalencoder.py)   | Encoding of hierarchical categorical features |
 | [LabelEncoder](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallellabelencoder.py)     | Encoding of categorical target variables |
+
+<br>
 
 Mneme also provides two pipeline structures: the **Imputation Pipeline** ([ParImputer](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelimputer.py)) and the **Preprocessing Pipeline** ([ParallelPipeline](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelpreprocessor.py)). The Imputation Pipeline combines multiple `SimpleImputer` instances, each employing a different strategy on a distinct subset of features for handling missing values. The Preprocessing Pipeline enables the integration of various operators, as listed in the table above.
 
