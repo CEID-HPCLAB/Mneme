@@ -32,7 +32,7 @@
 
 Clone the repository:
 ```bash
-git clone https://github.com/CEID-HPCLAB/Mneme
+git clone https://github.com/CEID-HPCLAB/Mneme.git
 cd Mneme
 ```
 
