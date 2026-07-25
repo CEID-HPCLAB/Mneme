@@ -24,6 +24,7 @@
   - [Comparison with Dask, Spark and Polars](#comparison-with-dask-spark-and-polars)
   - [Comparison with NVTabular](#comparison-with-nvtabular)
 - [File Structure](#file-structure)
+- [Planned Features](#planned-features)
 - [Citation](#citation)
 - [Acknowledgments](#acknowledgments)
 - [Contact](#contact)
@@ -56,7 +57,7 @@ Built on top of the [scikit-learn](https://scikit-learn.org/stable/) ecosystem, 
 <br>
 
 | Operator         | Description |
-|-----------------|-------------|
+|:-----------------:|:-------------:|
 | [StandardScaler](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelstandardscaler.py)   | Z-score normalization |
 | [MinMaxScaler](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelminmaxscaler.py)     | Scaling in a range specified by min and max values |
 | [MaxAbsScaler](https://github.com/CEID-HPCLAB/Mneme/blob/main/src/Mneme/preprocessing/parallelmaxabsscaler.py)     | Scaling in range [-1, 1] |
@@ -189,7 +190,7 @@ Regarding the comparison of Mneme with the GPU-based library NVTabular, a 151 GB
 As shown in the table below, Mneme achieves up to **1.87×** speedup over NVTabular.
 
 | Library    | Time (s) |
-|-----------|----------|
+|:-----------:|:----------:|
 | Mneme     | 143      |
 | NVTabular | 267      |
 
@@ -212,6 +213,16 @@ Mneme/
 ├── requirements.txt # Python dependencies
 ├── setup.py # Installation script (setuptools-based)
 ```
+
+## Planned Features
+
+- [X] Improve API documentation
+- [ ] Improve compatibility with the [scikit-learn](https://scikit-learn.org/stable/) interface
+- [ ] Automate and optimize block-size selection
+- [X] Leverage Python's native multithreading capabilities and techniques to mitigate GIL limitations
+- [X] Support distributed-memory systems (multi-node clusters)
+- [ ] Integrate GPU acceleration
+- [ ] Add new preprocessing operators
 
 
 ## Citation
