@@ -219,7 +219,7 @@ Mneme/
 - [X] Improve API documentation
 - [ ] Improve compatibility with the [scikit-learn](https://scikit-learn.org/stable/) interface
 - [ ] Automate and optimize block-size selection
-- [X] Leverage Python's native multithreading capabilities and techniques to mitigate GIL limitations
+- [X] Leverage Python's native multithreading capabilities and techniques to mitigate *GIL* limitations
 - [X] Support distributed-memory systems (multi-node clusters)
 - [ ] Integrate GPU acceleration
 - [ ] Add new preprocessing operators
